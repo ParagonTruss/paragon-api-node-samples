@@ -1,0 +1,15 @@
+{
+  "name": "paragon-api-node-samples",
+  "version": "1.0.0",
+  "description": "",
+  "module": "true",
+  "scripts": {
+    "start": "tsx --env-file=.env create-profile-trusses.ts"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.13.9",
+    "tsx": "^4.19.3"
+  }
+}
