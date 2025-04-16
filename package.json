@@ -5,7 +5,8 @@
   "module": "true",
   "scripts": {
     "start": "tsx --env-file=.env create-profile-trusses.ts.ts",
-    "start:layout": "tsx --env-file=.env create-gable-roof.ts"
+    "start:gable-layout": "tsx --env-file=.env create-gable-roof.ts",
+    "start:cross-gable-layout": "tsx --env-file=.env create-cross-gable-roof.ts"
   },
   "author": "",
   "license": "MIT",
