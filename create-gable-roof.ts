@@ -9,6 +9,14 @@ const paragonApiHeaders = {
 
 //// Main function
 
+const FEET = 12;
+
+const BUILDING_LENGTH = 60 * FEET;
+const TRUSS_SPAN = 24 * FEET;
+const WALL_HEIGHT = 8 * FEET;
+const HEEL_HEIGHT = 4.163118960624631;
+const TRUSS_MAX_ELEVATION = WALL_HEIGHT + 6 * FEET + HEEL_HEIGHT;
+
 async function main() {
   console.log("Creating project...");
   const project = await createProject({ name: "API Test Project" });
@@ -16,16 +24,16 @@ async function main() {
   console.log("Creating bearing envelopes...");
 
   const southWestPoint = { x: 0, y: 0 };
-  const southEastPoint = { x: 720, y: 0 };
-  const northEastPoint = { x: 720, y: 288 };
-  const northWestPoint = { x: 0, y: 288 };
+  const southEastPoint = { x: BUILDING_LENGTH, y: 0 };
+  const northEastPoint = { x: BUILDING_LENGTH, y: TRUSS_SPAN };
+  const northWestPoint = { x: 0, y: TRUSS_SPAN };
 
   const southBearingEnvelope = await createBearingEnvelope(project.guid, {
     name: "South",
     leftPoint: southWestPoint,
     rightPoint: southEastPoint,
     thickness: 3.5,
-    top: 108,
+    top: WALL_HEIGHT,
     bottom: 0,
     justification: "Front",
   });
@@ -35,7 +43,7 @@ async function main() {
     leftPoint: southEastPoint,
     rightPoint: northEastPoint,
     thickness: 3.5,
-    top: 108,
+    top: WALL_HEIGHT,
     bottom: 0,
     justification: "Front",
   });
@@ -45,7 +53,7 @@ async function main() {
     leftPoint: northEastPoint,
     rightPoint: northWestPoint,
     thickness: 3.5,
-    top: 108,
+    top: WALL_HEIGHT,
     bottom: 0,
     justification: "Front",
   });
@@ -55,7 +63,7 @@ async function main() {
     leftPoint: northWestPoint,
     rightPoint: southWestPoint,
     thickness: 3.5,
-    top: 108,
+    top: WALL_HEIGHT,
     bottom: 0,
     justification: "Front",
   });
@@ -66,19 +74,25 @@ async function main() {
     name: "Main",
     solidData: {
       vertices: [
-        { x: 0, y: 0, z: 108 }, // 0
-        { x: 720, y: 0, z: 108 }, // 1
-        { x: 720, y: 288, z: 108 }, // 2
-        { x: 0, y: 288, z: 108 }, // 3
-        { x: 0, y: 144, z: 228 }, // 4
-        { x: 720, y: 144, z: 228 }, // 5
+        { x: 0, y: 0, z: WALL_HEIGHT }, // 0; South-west base
+        { x: BUILDING_LENGTH, y: 0, z: WALL_HEIGHT }, // 1; South-east base
+        { x: BUILDING_LENGTH, y: TRUSS_SPAN, z: WALL_HEIGHT }, // 2; North-east base
+        { x: 0, y: TRUSS_SPAN, z: WALL_HEIGHT }, // 3; North-west base
+        { x: 0, y: 0, z: WALL_HEIGHT + HEEL_HEIGHT }, // 4; South-west heel
+        { x: BUILDING_LENGTH, y: 0, z: WALL_HEIGHT + HEEL_HEIGHT }, // 5; South-east heel
+        { x: BUILDING_LENGTH, y: TRUSS_SPAN, z: WALL_HEIGHT + HEEL_HEIGHT }, // 6; North-east heel
+        { x: 0, y: TRUSS_SPAN, z: WALL_HEIGHT + HEEL_HEIGHT }, // 7; North-west heel
+        { x: 0, y: TRUSS_SPAN / 2, z: TRUSS_MAX_ELEVATION }, // 8; West truss peak
+        { x: BUILDING_LENGTH, y: TRUSS_SPAN / 2, z: TRUSS_MAX_ELEVATION }, // 9; East truss peak
       ],
       faces: [
-        { outer: [0, 3, 2, 1] },
-        { outer: [0, 4, 3] },
-        { outer: [0, 1, 5, 4] },
-        { outer: [1, 2, 5] },
-        { outer: [2, 3, 4, 5] },
+        { outer: [0, 3, 2, 1] }, // Base
+        { outer: [0, 4, 8, 7, 3] }, // West vertical plane
+        { outer: [0, 1, 5, 4] }, // South heel
+        { outer: [4, 5, 9, 8] }, // South roof plane
+        { outer: [1, 2, 6, 9, 5] }, // East vertical plane
+        { outer: [2, 3, 7, 6] }, // North heel
+        { outer: [6, 7, 8, 9] }, // North roof plane
       ],
     },
   });
@@ -87,8 +101,8 @@ async function main() {
 
   const trussEnvelope = await createTrussEnvelope(project.guid, {
     name: "1",
-    leftPoint: { x: 84, y: 0 },
-    rightPoint: { x: 84, y: 288 },
+    leftPoint: { x: 7 * FEET, y: 0 },
+    rightPoint: { x: 7 * FEET, y: TRUSS_SPAN },
     justification: "Back",
     thickness: 1.5,
     roofContainerGuid: roofContainer.guid,
