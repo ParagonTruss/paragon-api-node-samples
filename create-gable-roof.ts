@@ -90,18 +90,15 @@ async function main() {
   };
 
   const southFace = {
-    vertices: [southWestHeel, southEastHeel, eastTrussPeak, westTrussPeak],
+    vertexLoop: [southWestHeel, southEastHeel, eastTrussPeak, westTrussPeak],
   };
   const northFace = {
-    vertices: [northEastHeel, northWestHeel, westTrussPeak, eastTrussPeak],
+    vertexLoop: [northEastHeel, northWestHeel, westTrussPeak, eastTrussPeak],
   };
 
   const roofFaces = [southFace, northFace];
 
-  const roofPlanes = await createRoofPlanesFromPolygons(
-    project.guid,
-    roofFaces,
-  );
+  const roofPlanes = await createRoofPlanesFromFaces(project.guid, roofFaces);
 
   console.log("Creating truss envelope...");
 
@@ -177,18 +174,18 @@ interface BearingEnvelope extends NewBearingEnvelope {
   guid: string;
 }
 
-//// POST /roofPlanes/fromPolygons route
+//// POST /roofPlanes/fromFaces route
 
-async function createRoofPlanesFromPolygons(
+async function createRoofPlanesFromFaces(
   projectGuid: string,
-  polygons: Polygon3D[],
+  faces: LayoutFace[],
 ): Promise<RoofPlane[]> {
   const response = await fetch(
-    `${paragonApiBaseUrl}/projects/${projectGuid}/roofPlanes/fromPolygons`,
+    `${paragonApiBaseUrl}/projects/${projectGuid}/roofPlanes/fromFaces`,
     {
       method: "POST",
       headers: paragonApiHeaders,
-      body: JSON.stringify(polygons),
+      body: JSON.stringify(faces),
     },
   );
   return await response.json();
@@ -197,6 +194,7 @@ async function createRoofPlanesFromPolygons(
 //// RoofPlane type
 
 interface RoofPlane {
+  guid: string;
   geometryType: RoofPlaneReferenceGeometryType;
   elevation: number;
   segment: Segment2D | null;
@@ -217,6 +215,12 @@ interface PlaneCut {
   type: PlaneCutType;
   cuttingPlaneGuid: string;
   segment: Segment2D | null;
+}
+
+//// LayoutFace type
+
+interface LayoutFace {
+  vertexLoop: Point3D[];
 }
 
 //// POST /trussEnvelopes route
@@ -246,6 +250,8 @@ interface NewTrussEnvelope {
   thickness: number;
   leftBevelCut?: BevelCut | null;
   rightBevelCut?: BevelCut | null;
+  topCuts?: TopOrBottomCut[];
+  bottomCuts?: TopOrBottomCut[];
 }
 
 interface TrussEnvelope extends NewTrussEnvelope {
@@ -261,6 +267,15 @@ interface BevelCut {
 }
 
 type BevelCutType = "Back" | "Double" | "Front";
+
+interface TopOrBottomCut {
+  type: TopOrBottomCutType;
+  plane?: Plane3D | null;
+  roofPlaneGuid?: string;
+  ceilingPlaneGuid?: string;
+}
+
+type TopOrBottomCutType = "Absolute" | "RoofPlane" | "CeilingPlane";
 
 //// POST /createTrusses route
 
@@ -292,6 +307,9 @@ interface Point3D {
   z: number;
 }
 
-interface Polygon3D {
-  vertices: Point3D[];
+interface Plane3D {
+  a: number;
+  b: number;
+  c: number;
+  d: number;
 }
