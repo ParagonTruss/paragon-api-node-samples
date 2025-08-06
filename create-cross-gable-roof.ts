@@ -115,94 +115,88 @@ async function main() {
     justification: "Front",
   });
 
-  console.log("Creating roof containers...");
+  console.log("Creating roof planes...");
 
-  const mainRoofContainer = await createRoofContainer(project.guid, {
-    name: "Main",
-    solidData: {
-      vertices: [
-        { x: 0, y: 0, z: WALL_HEIGHT }, // 0; South-west base
-        { x: BUILDING_LENGTH, y: 0, z: WALL_HEIGHT }, // 1; South-east base
-        { x: BUILDING_LENGTH, y: TRUSS_SPAN, z: WALL_HEIGHT }, // 2; North-east base
-        { x: 0, y: TRUSS_SPAN, z: WALL_HEIGHT }, // 3; North-west base
-        { x: 0, y: 0, z: WALL_HEIGHT + HEEL_HEIGHT }, // 4; South-west heel
-        { x: BUILDING_LENGTH, y: 0, z: WALL_HEIGHT + HEEL_HEIGHT }, // 5; South-east heel
-        { x: BUILDING_LENGTH, y: TRUSS_SPAN, z: WALL_HEIGHT + HEEL_HEIGHT }, // 6; North-east heel
-        { x: 0, y: TRUSS_SPAN, z: WALL_HEIGHT + HEEL_HEIGHT }, // 7; North-west heel
-        { x: 0, y: TRUSS_SPAN / 2, z: TRUSS_MAX_ELEVATION }, // 8; West truss peak
-        { x: BUILDING_LENGTH, y: TRUSS_SPAN / 2, z: TRUSS_MAX_ELEVATION }, // 9; East truss peak
-      ],
-      faces: [
-        { outer: [0, 3, 2, 1] }, // Base
-        { outer: [0, 4, 8, 7, 3] }, // West vertical plane
-        { outer: [0, 1, 5, 4] }, // South heel
-        { outer: [4, 5, 9, 8] }, // South roof plane
-        { outer: [1, 2, 6, 9, 5] }, // East vertical plane
-        { outer: [2, 3, 7, 6] }, // North heel
-        { outer: [6, 7, 8, 9] }, // North roof plane
-      ],
-    },
-  });
+  const southWestHeel = { x: 0, y: 0, z: WALL_HEIGHT + HEEL_HEIGHT };
+  const southEastHeel = {
+    x: BUILDING_LENGTH,
+    y: 0,
+    z: WALL_HEIGHT + HEEL_HEIGHT,
+  };
+  const northEastHeel = {
+    x: BUILDING_LENGTH,
+    y: TRUSS_SPAN,
+    z: WALL_HEIGHT + HEEL_HEIGHT,
+  };
+  const northWestHeel = { x: 0, y: TRUSS_SPAN, z: WALL_HEIGHT + HEEL_HEIGHT };
+  const westTrussPeak = { x: 0, y: TRUSS_SPAN / 2, z: TRUSS_MAX_ELEVATION };
+  const eastTrussPeak = {
+    x: BUILDING_LENGTH,
+    y: TRUSS_SPAN / 2,
+    z: TRUSS_MAX_ELEVATION,
+  };
 
-  const upperRoofContainer = await createRoofContainer(project.guid, {
-    name: "Upper",
-    solidData: {
-      vertices: [
-        {
-          x: BUILDING_LENGTH / 2 - TRUSS_SPAN / 2,
-          y: TRUSS_SPAN,
-          z: WALL_HEIGHT,
-        }, // 0; South-west base
-        {
-          x: BUILDING_LENGTH / 2 + TRUSS_SPAN / 2,
-          y: TRUSS_SPAN,
-          z: WALL_HEIGHT,
-        }, // 1; South-east base
-        {
-          x: BUILDING_LENGTH / 2 + TRUSS_SPAN / 2,
-          y: BUILDING_LENGTH,
-          z: WALL_HEIGHT,
-        }, // 2; North-east base
-        {
-          x: BUILDING_LENGTH / 2 - TRUSS_SPAN / 2,
-          y: BUILDING_LENGTH,
-          z: WALL_HEIGHT,
-        }, // 3; North-west base
-        {
-          x: BUILDING_LENGTH / 2 - TRUSS_SPAN / 2,
-          y: TRUSS_SPAN,
-          z: WALL_HEIGHT + HEEL_HEIGHT,
-        }, // 4; South-west heel
-        {
-          x: BUILDING_LENGTH / 2 + TRUSS_SPAN / 2,
-          y: TRUSS_SPAN,
-          z: WALL_HEIGHT + HEEL_HEIGHT,
-        }, // 5; South-east heel
-        {
-          x: BUILDING_LENGTH / 2 + TRUSS_SPAN / 2,
-          y: BUILDING_LENGTH,
-          z: WALL_HEIGHT + HEEL_HEIGHT,
-        }, // 6; North-east heel
-        {
-          x: BUILDING_LENGTH / 2 - TRUSS_SPAN / 2,
-          y: BUILDING_LENGTH,
-          z: WALL_HEIGHT + HEEL_HEIGHT,
-        }, // 7; North-west heel
-        { x: BUILDING_LENGTH / 2, y: TRUSS_SPAN / 2, z: TRUSS_MAX_ELEVATION }, // 8; South truss peak
-        { x: BUILDING_LENGTH / 2, y: BUILDING_LENGTH, z: TRUSS_MAX_ELEVATION }, // 9; North truss peak
-      ],
-      faces: [
-        { outer: [0, 3, 2, 1] }, // Base
-        { outer: [0, 1, 5, 4] }, // South heel
-        { outer: [4, 5, 8] }, // South valley plane
-        { outer: [1, 2, 6, 5] }, // East heel
-        { outer: [5, 6, 9, 8] }, // East roof plane
-        { outer: [2, 3, 7, 9, 6] }, // North vertical plane
-        { outer: [3, 0, 4, 7] }, // West heel
-        { outer: [7, 4, 8, 9] }, // West roof plane
-      ],
-    },
-  });
+  const southFace = {
+    vertices: [southWestHeel, southEastHeel, eastTrussPeak, westTrussPeak],
+  };
+  const northFace = {
+    vertices: [northEastHeel, northWestHeel, westTrussPeak, eastTrussPeak],
+  };
+
+  const upperSouthWestHeel = {
+    x: BUILDING_LENGTH / 2 - TRUSS_SPAN / 2,
+    y: TRUSS_SPAN,
+    z: WALL_HEIGHT + HEEL_HEIGHT,
+  };
+  const upperSouthEastHeel = {
+    x: BUILDING_LENGTH / 2 + TRUSS_SPAN / 2,
+    y: TRUSS_SPAN,
+    z: WALL_HEIGHT + HEEL_HEIGHT,
+  };
+  const upperNorthEastHeel = {
+    x: BUILDING_LENGTH / 2 + TRUSS_SPAN / 2,
+    y: BUILDING_LENGTH,
+    z: WALL_HEIGHT + HEEL_HEIGHT,
+  };
+  const upperNorthWestHeel = {
+    x: BUILDING_LENGTH / 2 - TRUSS_SPAN / 2,
+    y: BUILDING_LENGTH,
+    z: WALL_HEIGHT + HEEL_HEIGHT,
+  };
+  const upperSouthTrussPeak = {
+    x: BUILDING_LENGTH / 2,
+    y: TRUSS_SPAN / 2,
+    z: TRUSS_MAX_ELEVATION,
+  };
+  const upperNorthTrussPeak = {
+    x: BUILDING_LENGTH / 2,
+    y: BUILDING_LENGTH,
+    z: TRUSS_MAX_ELEVATION,
+  };
+
+  const upperWestFace = {
+    vertices: [
+      upperNorthWestHeel,
+      upperSouthWestHeel,
+      upperSouthTrussPeak,
+      upperNorthTrussPeak,
+    ],
+  };
+  const upperEastFace = {
+    vertices: [
+      upperSouthEastHeel,
+      upperNorthEastHeel,
+      upperNorthTrussPeak,
+      upperSouthTrussPeak,
+    ],
+  };
+
+  const roofFaces = [southFace, northFace, upperWestFace, upperEastFace];
+
+  const roofPlanes = await createRoofPlanesFromPolygons(
+    project.guid,
+    roofFaces,
+  );
 
   console.log("Creating truss envelopes...");
 
@@ -212,7 +206,6 @@ async function main() {
     rightPoint: { x: 7 * FEET, y: TRUSS_SPAN },
     justification: "Back",
     thickness: 1.5,
-    roofContainerGuid: mainRoofContainer.guid,
   });
 
   const upperTrussEnvelope = await createTrussEnvelope(project.guid, {
@@ -227,7 +220,6 @@ async function main() {
     },
     justification: "Back",
     thickness: 1.5,
-    roofContainerGuid: upperRoofContainer.guid,
   });
 
   const valleyTrussEnvelopes: TrussEnvelope[] = [];
@@ -245,7 +237,6 @@ async function main() {
       },
       justification: "Back",
       thickness: 1.5,
-      roofContainerGuid: upperRoofContainer.guid,
     });
 
     valleyTrussEnvelopes.push(valleyTrussEnvelope);
@@ -257,7 +248,6 @@ async function main() {
     rightPoint: { x: BUILDING_LENGTH / 2, y: TRUSS_SPAN },
     justification: "Back",
     thickness: 1.5,
-    roofContainerGuid: mainRoofContainer.guid,
   });
 
   console.log("Designing truss...");
@@ -298,7 +288,7 @@ interface Project extends NewProject {
 async function createBearingEnvelope(
   projectGuid: string,
   bearingEnvelope: NewBearingEnvelope,
-): Promise<RoofContainer> {
+): Promise<BearingEnvelope> {
   const response = await fetch(
     `${paragonApiBaseUrl}/projects/${projectGuid}/bearingEnvelopes`,
     {
@@ -327,42 +317,46 @@ interface BearingEnvelope extends NewBearingEnvelope {
   guid: string;
 }
 
-//// POST /roofContainers route
+//// POST /roofPlanes/fromPolygons route
 
-async function createRoofContainer(
+async function createRoofPlanesFromPolygons(
   projectGuid: string,
-  roofContainer: NewRoofContainer,
-): Promise<RoofContainer> {
+  polygons: Polygon3D[],
+): Promise<RoofPlane[]> {
   const response = await fetch(
-    `${paragonApiBaseUrl}/projects/${projectGuid}/roofContainers`,
+    `${paragonApiBaseUrl}/projects/${projectGuid}/roofPlanes/fromPolygons`,
     {
       method: "POST",
       headers: paragonApiHeaders,
-      body: JSON.stringify(roofContainer),
+      body: JSON.stringify(polygons),
     },
   );
   return await response.json();
 }
 
-//// RoofContainer type
+//// RoofPlane type
 
-interface NewRoofContainer {
-  name: string;
-  solidData: SolidData;
+interface RoofPlane {
+  geometryType: RoofPlaneReferenceGeometryType;
+  elevation: number;
+  segment: Segment2D | null;
+  bearingEnvelopeGuid: string;
+  flipped: boolean;
+  slope: number;
+  heelHeight: number;
+  overhang: number;
+  cantilever: number;
+  cuts: PlaneCut[];
 }
 
-interface RoofContainer extends NewRoofContainer {
-  guid: string;
-}
+type RoofPlaneReferenceGeometryType = "Absolute" | "BearingEnvelope";
 
-interface SolidData {
-  vertices: Point3D[];
-  faces: SolidDataFace[];
-}
+type PlaneCutType = "AbsoluteVertical" | "AgainstPlane";
 
-interface SolidDataFace {
-  outer: number[];
-  inner?: number[][] | null;
+interface PlaneCut {
+  type: PlaneCutType;
+  cuttingPlaneGuid: string;
+  segment: Segment2D | null;
 }
 
 //// POST /trussEnvelopes route
@@ -391,8 +385,7 @@ interface NewTrussEnvelope {
   justification: Justification;
   thickness: number;
   leftBevelCut?: BevelCut | null;
-  rightBevelCenter?: BevelCut | null;
-  roofContainerGuid?: string | null;
+  rightBevelCut?: BevelCut | null;
 }
 
 interface TrussEnvelope extends NewTrussEnvelope {
